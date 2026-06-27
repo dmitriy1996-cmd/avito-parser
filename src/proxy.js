@@ -20,10 +20,10 @@ const SOCKS_PROTOCOLS = new Set(['socks', 'socks4', 'socks5', 'socks5h']);
  * ProxyManager rotates through configured proxies and builds a unique
  * sticky-session identity for each browser context.
  *
- * Session id placement differs per provider (handled by `buildUsername`):
- *   Bright Data / IPRoyal:  user-session-<id>            (token at the end)
- *   NetNut:                 user-sid-<id>                 (token at the end)
- *   NodeMaven:              user-...-sid-<id>-filter-...  (token in the MIDDLE)
+ * Session id placement (handled by `buildUsername`):
+ *   - Token already inside the username (NodeMaven "-sid-<id>-filter-..")
+ *     → its value is replaced in place.
+ *   - Token absent → it is appended as "<user><TOKEN><id>".
  *
  * Transport handling (handled by `acquire`):
  *   - HTTP/HTTPS proxies are passed to Playwright natively (it supports
@@ -57,7 +57,7 @@ export class ProxyManager {
       if (re.test(username)) return username.replace(re, `$1${unique}`);
       return `${username}${unique}`;
     }
-    // Token not present: append it (Bright Data / IPRoyal style).
+    // Token not present: append it as "<user><TOKEN><id>".
     return `${username}${token}${unique}`;
   }
 

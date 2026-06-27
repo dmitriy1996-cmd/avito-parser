@@ -93,39 +93,33 @@ Copy-Item .env.example .env   # Windows PowerShell
 
 ## Настройка прокси
 
-Отредактируйте `.env`. Либо один ротационный шлюз:
+Парсер рассчитан на резидентные прокси [NodeMaven](https://nodemaven.com). Для
+Avito нужен **российский** выходной IP — опция NodeMaven `-country-ru` даёт его
+со sticky-сессиями, что как раз и требуется.
 
-```env
-PROXY_HOST=brd.superproxy.io
-PROXY_PORT=22225
-PROXY_USERNAME=brd-customer-XXXX-zone-residential
-PROXY_PASSWORD=ваш_пароль
-SESSION_TOKEN=-session-
-```
-
-…либо явный список (через запятую или с новой строки, `host:port:user:pass`):
-
-```env
-PROXY_LIST=host1:8000:user:pass, host2:8000:user:pass
-```
-
-К имени пользователя автоматически добавляется уникальный токен `-session-<random>`,
-поэтому провайдеры вроде Bright Data / IPRoyal / NetNut закрепляют отдельный IP за
-каждым контекстом.
-
-### Пример NodeMaven (SOCKS5)
-
-У NodeMaven SOCKS5 на порту `1080`, а id сессии лежит внутри username (`-sid-<id>-`).
-Для Avito обязательно используйте **российский** выход:
+Все настройки прокси задаются в файле **`.env`** (отдельного файла для прокси
+нет). У NodeMaven SOCKS5 на порту `1080`, а id сессии лежит внутри username
+(`-sid-<id>-`):
 
 ```env
 PROXY_LIST=socks5://USER-country-ru-sid-XXXX-filter-high:PASS@gate.nodemaven.com:1080
 SESSION_TOKEN=-sid-
 ```
 
-Скрейпер сам определит схему `socks5://` и поднимет локальный мост HTTP→SOCKS на
-каждый контекст (Chromium не умеет авторизацию SOCKS напрямую). `SESSION_TOKEN=-sid-`
-заставляет подставлять уникальный `sid` в каждый контекст → свой IP на поток.
+К имени пользователя в каждом контексте подставляется уникальный токен сессии,
+поэтому каждый поток получает свой sticky российский IP. Скрейпер сам определит
+схему `socks5://` и поднимет локальный мост HTTP→SOCKS на каждый контекст
+(Chromium не умеет авторизацию SOCKS напрямую).
+
+Чтобы ротировать несколько сессий NodeMaven, перечислите их через запятую или
+с новой строки:
+
+```env
+PROXY_LIST=socks5://USER-country-ru-sid-AAAA-filter-high:PASS@gate.nodemaven.com:1080, socks5://USER-country-ru-sid-BBBB-filter-high:PASS@gate.nodemaven.com:1080
+```
+
+> Нет аккаунта? Резидентные прокси можно взять на
+> [nodemaven.com](https://nodemaven.com).
 
 ### Решение капчи Avito (2Captcha)
 

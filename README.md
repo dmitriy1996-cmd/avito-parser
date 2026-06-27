@@ -78,37 +78,33 @@ cp .env.example .env   # then edit .env with your proxy credentials
 
 ## Configure proxies
 
-Edit `.env`. Either a single rotating gateway:
+This scraper is built around [NodeMaven](https://nodemaven.com) residential
+proxies. Avito requires a **Russian** exit IP — NodeMaven's `-country-ru`
+option provides one with sticky sessions, which is exactly what's needed.
 
-```env
-PROXY_HOST=brd.superproxy.io
-PROXY_PORT=22225
-PROXY_USERNAME=brd-customer-XXXX-zone-residential
-PROXY_PASSWORD=yourpassword
-SESSION_TOKEN=-session-
-```
-
-…or an explicit list (comma- or newline-separated, `host:port:user:pass`):
-
-```env
-PROXY_LIST=host1:8000:user:pass, host2:8000:user:pass
-```
-
-A unique `-session-<random>` token is appended to the username per context so
-providers like Bright Data / IPRoyal / NetNut pin a distinct IP to each one.
-
-### NodeMaven (SOCKS5) example
-
-NodeMaven exposes SOCKS5 on port `1080` and encodes the session id inside the
-username (`-sid-<id>-`). Use a **Russian** exit for Avito:
+All proxy settings live in the **`.env`** file (there is no separate proxy
+file). NodeMaven exposes SOCKS5 on port `1080` and encodes the session id
+inside the username (`-sid-<id>-`):
 
 ```env
 PROXY_LIST=socks5://USER-country-ru-sid-XXXX-filter-high:PASS@gate.nodemaven.com:1080
 SESSION_TOKEN=-sid-
 ```
 
-The scraper detects the SOCKS scheme and automatically runs a local
-HTTP→SOCKS bridge per context (Chromium can't authenticate SOCKS directly).
+A unique session token is injected into the username per browser context, so
+each worker gets its own sticky Russian IP. The scraper detects the SOCKS
+scheme and automatically runs a local HTTP→SOCKS bridge per context (Chromium
+can't authenticate SOCKS directly).
+
+To rotate across several NodeMaven sessions, list them comma- or
+newline-separated:
+
+```env
+PROXY_LIST=socks5://USER-country-ru-sid-AAAA-filter-high:PASS@gate.nodemaven.com:1080, socks5://USER-country-ru-sid-BBBB-filter-high:PASS@gate.nodemaven.com:1080
+```
+
+> Don't have an account yet? Grab residential proxies at
+> [nodemaven.com](https://nodemaven.com).
 
 ### Solving Avito's CAPTCHA (2Captcha)
 
