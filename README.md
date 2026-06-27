@@ -215,7 +215,4 @@ tabular form for Excel/Google Sheets):
   extraction returns `null`.
 - Quality **residential** proxies are essential — datacenter IPs are blocked
   almost immediately.
-- Respect Avito's Terms of Service, `robots.txt`, and applicable laws. Use a
-  low concurrency and generous delays. This code is provided for educational
-  and authorized use only.
 ```
