@@ -1,4 +1,9 @@
 import 'dotenv/config';
+import { readFileSync, existsSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 /**
  * Centralized configuration for the Avito scraper.
@@ -67,25 +72,55 @@ function parseProxyEntry(entry) {
 }
 
 /**
- * Parse the PROXY_LIST env var or the single PROXY_* gateway into a
- * normalized array of proxy descriptors.
+ * Read proxy entries from a plain-text file (one proxy per line).
+ * Blank lines and lines starting with '#' are ignored. Returns the raw
+ * (unparsed) entry strings.
+ */
+function readProxyFile() {
+  const file = process.env.PROXY_FILE || 'proxies.txt';
+  const filePath = path.isAbsolute(file) ? file : path.join(ROOT, file);
+  if (!existsSync(filePath)) return [];
+
+  try {
+    return readFileSync(filePath, 'utf8')
+      .split(/\r?\n/)
+      .map((l) => l.trim())
+      .filter((l) => l && !l.startsWith('#'));
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Build the proxy pool. Sources are merged in this order:
+ *   1. proxies.txt file (one proxy per line) — primary, easy to edit.
+ *   2. PROXY_LIST env var (comma/newline-separated).
+ *   3. Single PROXY_* gateway (only if nothing above matched).
  */
 function parseProxies() {
-  const list = (process.env.PROXY_LIST || '').trim();
   const proxies = [];
+  const seen = new Set();
 
-  if (list) {
-    list
-      .split(/[\n,]+/)
-      .map((s) => s.trim())
-      .filter(Boolean)
-      .forEach((entry) => {
-        const parsed = parseProxyEntry(entry);
-        if (parsed) proxies.push(parsed);
-      });
-  }
+  const addEntry = (entry) => {
+    const parsed = parseProxyEntry(entry);
+    if (!parsed) return;
+    const key = `${parsed.protocol}://${parsed.host}:${parsed.port}:${parsed.username || ''}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    proxies.push(parsed);
+  };
 
-  // Fall back to single gateway if no list was provided.
+  // 1. Separate file (recommended for multi-proxy / multi-thread setups).
+  readProxyFile().forEach(addEntry);
+
+  // 2. PROXY_LIST env var.
+  (process.env.PROXY_LIST || '')
+    .split(/[\n,]+/)
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .forEach(addEntry);
+
+  // 3. Fall back to a single gateway if nothing else was provided.
   if (proxies.length === 0 && process.env.PROXY_HOST && process.env.PROXY_PORT) {
     proxies.push({
       protocol: DEFAULT_PROTOCOL,

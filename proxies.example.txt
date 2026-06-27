@@ -1,0 +1,16 @@
+# Proxy list — one proxy per line. Blank lines and '#' comments are ignored.
+#
+# Formats supported:
+#   socks5://username:password@host:port      (or http://, https://)
+#   host:port:username:password               (scheme = PROXY_PROTOCOL)
+#
+# This file is the recommended place to put proxies for multi-thread runs:
+# each worker picks a proxy round-robin, and a unique session id is injected
+# automatically so every context gets its own sticky exit IP.
+#
+# Copy this to "proxies.txt" and fill in your NodeMaven (https://nodemaven.com)
+# residential proxies. Use a RUSSIAN exit ("-country-ru") for Avito.
+
+# socks5://USER-country-ru-sid-AAAA-filter-high:PASS@gate.nodemaven.com:1080
+# socks5://USER-country-ru-sid-BBBB-filter-high:PASS@gate.nodemaven.com:1080
+# socks5://USER-country-ru-sid-CCCC-filter-high:PASS@gate.nodemaven.com:1080

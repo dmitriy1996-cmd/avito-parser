@@ -82,26 +82,35 @@ This scraper is built around [NodeMaven](https://nodemaven.com) residential
 proxies. Avito requires a **Russian** exit IP — NodeMaven's `-country-ru`
 option provides one with sticky sessions, which is exactly what's needed.
 
-All proxy settings live in the **`.env`** file (there is no separate proxy
-file). NodeMaven exposes SOCKS5 on port `1080` and encodes the session id
-inside the username (`-sid-<id>-`):
+### Proxy file (recommended for multi-threading)
 
-```env
-PROXY_LIST=socks5://USER-country-ru-sid-XXXX-filter-high:PASS@gate.nodemaven.com:1080
-SESSION_TOKEN=-sid-
+Put your proxies in a **separate `proxies.txt`** file — one proxy per line.
+This is the easiest way to feed many proxies for parallel workers: each worker
+picks one round-robin and a unique session id is injected automatically, so
+every browser context gets its own sticky Russian IP.
+
+```bash
+cp proxies.example.txt proxies.txt   # then edit proxies.txt
 ```
 
-A unique session token is injected into the username per browser context, so
-each worker gets its own sticky Russian IP. The scraper detects the SOCKS
-scheme and automatically runs a local HTTP→SOCKS bridge per context (Chromium
-can't authenticate SOCKS directly).
-
-To rotate across several NodeMaven sessions, list them comma- or
-newline-separated:
-
-```env
-PROXY_LIST=socks5://USER-country-ru-sid-AAAA-filter-high:PASS@gate.nodemaven.com:1080, socks5://USER-country-ru-sid-BBBB-filter-high:PASS@gate.nodemaven.com:1080
+```text
+# proxies.txt — one per line, '#' comments allowed
+socks5://USER-country-ru-sid-AAAA-filter-high:PASS@gate.nodemaven.com:1080
+socks5://USER-country-ru-sid-BBBB-filter-high:PASS@gate.nodemaven.com:1080
+socks5://USER-country-ru-sid-CCCC-filter-high:PASS@gate.nodemaven.com:1080
 ```
+
+NodeMaven exposes SOCKS5 on port `1080` and encodes the session id inside the
+username (`-sid-<id>-`). Set `SESSION_TOKEN=-sid-` in `.env` so the scraper
+rotates the session per context. The number of parallel workers is controlled
+by `CONCURRENCY` in `.env`.
+
+The scraper detects the SOCKS scheme and automatically runs a local HTTP→SOCKS
+bridge per context (Chromium can't authenticate SOCKS directly). `proxies.txt`
+is git-ignored so your credentials never get committed.
+
+The file path is configurable via `PROXY_FILE`. Alternatively you can set
+`PROXY_LIST` inline in `.env` (comma/newline-separated) instead of the file.
 
 > Don't have an account yet? Grab residential proxies at
 > [nodemaven.com](https://nodemaven.com).

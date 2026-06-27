@@ -97,26 +97,35 @@ Copy-Item .env.example .env   # Windows PowerShell
 Avito нужен **российский** выходной IP — опция NodeMaven `-country-ru` даёт его
 со sticky-сессиями, что как раз и требуется.
 
-Все настройки прокси задаются в файле **`.env`** (отдельного файла для прокси
-нет). У NodeMaven SOCKS5 на порту `1080`, а id сессии лежит внутри username
-(`-sid-<id>-`):
+### Файл с прокси (рекомендуется для нескольких потоков)
 
-```env
-PROXY_LIST=socks5://USER-country-ru-sid-XXXX-filter-high:PASS@gate.nodemaven.com:1080
-SESSION_TOKEN=-sid-
+Прокси задаются в **отдельном файле `proxies.txt`** — по одному в строке. Это
+самый удобный способ скормить много прокси для параллельных потоков: каждый
+поток берёт прокси по кругу, а уникальный id сессии подставляется
+автоматически, поэтому каждый контекст получает свой sticky российский IP.
+
+```bash
+cp proxies.example.txt proxies.txt   # затем отредактируйте proxies.txt
 ```
 
-К имени пользователя в каждом контексте подставляется уникальный токен сессии,
-поэтому каждый поток получает свой sticky российский IP. Скрейпер сам определит
-схему `socks5://` и поднимет локальный мост HTTP→SOCKS на каждый контекст
-(Chromium не умеет авторизацию SOCKS напрямую).
-
-Чтобы ротировать несколько сессий NodeMaven, перечислите их через запятую или
-с новой строки:
-
-```env
-PROXY_LIST=socks5://USER-country-ru-sid-AAAA-filter-high:PASS@gate.nodemaven.com:1080, socks5://USER-country-ru-sid-BBBB-filter-high:PASS@gate.nodemaven.com:1080
+```text
+# proxies.txt — по одному в строке, можно комментарии через '#'
+socks5://USER-country-ru-sid-AAAA-filter-high:PASS@gate.nodemaven.com:1080
+socks5://USER-country-ru-sid-BBBB-filter-high:PASS@gate.nodemaven.com:1080
+socks5://USER-country-ru-sid-CCCC-filter-high:PASS@gate.nodemaven.com:1080
 ```
+
+У NodeMaven SOCKS5 на порту `1080`, id сессии лежит внутри username
+(`-sid-<id>-`). Поставьте `SESSION_TOKEN=-sid-` в `.env`, чтобы менеджер менял
+сессию на каждый контекст. Число параллельных потоков задаётся параметром
+`CONCURRENCY` в `.env`.
+
+Скрейпер сам определит схему `socks5://` и поднимет локальный мост HTTP→SOCKS
+на каждый контекст (Chromium не умеет авторизацию SOCKS напрямую). Файл
+`proxies.txt` в `.gitignore` — ваши креды не попадут в репозиторий.
+
+Путь к файлу настраивается через `PROXY_FILE`. Как альтернатива — можно задать
+`PROXY_LIST` прямо в `.env` (через запятую/с новой строки) вместо файла.
 
 > Нет аккаунта? Резидентные прокси можно взять на
 > [nodemaven.com](https://nodemaven.com).
