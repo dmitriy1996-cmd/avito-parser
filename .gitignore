@@ -1,0 +1,8 @@
+node_modules/
+.env
+results.json
+results.csv
+captcha_config_debug.json
+*.png
+*.log
+.DS_Store
