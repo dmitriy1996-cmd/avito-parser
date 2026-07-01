@@ -90,11 +90,12 @@ Copy-Item .env.example .env   # Windows PowerShell
 
 ## Настройка прокси
 
-Парсер рассчитан на резидентные прокси [NodeMaven]([https://nodemaven.com](https://go.nodemaven.com/githab)). Для
+Парсер рассчитан на резидентные прокси [NodeMaven](https://go.nodemaven.com/githab). Для
 Avito нужен **российский** выходной IP — опция NodeMaven `-country-ru` даёт его
 со sticky-сессиями, что как раз и требуется.
-промокоды AVPARSER35 - 35% скидка на Мобильные и Резидентские
-AVPARSER40 - 40% скидка на ISP (Статику)
+
+промокоды AVPARSER35 - 35% скидка на Мобильные и 
+Резидентские AVPARSER40 - 40% скидка на ISP (Статику)
 
 ### Файл с прокси (рекомендуется для нескольких потоков)
 
@@ -127,7 +128,7 @@ socks5://USER-country-ru-sid-CCCC-filter-high:PASS@gate.nodemaven.com:1080
 `PROXY_LIST` прямо в `.env` (через запятую/с новой строки) вместо файла.
 
 > Нет аккаунта? Резидентные прокси можно взять на
-> [nodemaven.com](https://nodemaven.com).
+> [nodemaven.com](https://go.nodemaven.com/githab).
 
 ### Решение капчи Avito (2Captcha)
 
