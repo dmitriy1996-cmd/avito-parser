@@ -90,9 +90,11 @@ Copy-Item .env.example .env   # Windows PowerShell
 
 ## Настройка прокси
 
-Парсер рассчитан на резидентные прокси [NodeMaven](https://nodemaven.com). Для
+Парсер рассчитан на резидентные прокси [NodeMaven]([https://nodemaven.com](https://go.nodemaven.com/githab)). Для
 Avito нужен **российский** выходной IP — опция NodeMaven `-country-ru` даёт его
 со sticky-сессиями, что как раз и требуется.
+промокоды AVPARSER35 - 35% скидка на Мобильные и Резидентские
+AVPARSER40 - 40% скидка на ISP (Статику)
 
 ### Файл с прокси (рекомендуется для нескольких потоков)
 
